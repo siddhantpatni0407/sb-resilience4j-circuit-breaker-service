@@ -1,0 +1,19 @@
+server:
+  port: 8081  # Port for Service B
+
+spring:
+  application:
+    name: service-b  # Unique application name for discovery/logging
+
+management:
+  endpoint:
+    health:
+      show-details: always  # Always show detailed health info
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics  # Expose selected actuator endpoints
+
+logging:
+  level:
+    root: INFO  # Set base logging level (DEBUG for dev, INFO/ERROR for prod)

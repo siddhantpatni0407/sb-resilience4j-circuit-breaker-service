@@ -1,0 +1,51 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: service-a
+
+management:
+  endpoint:
+    health:
+      show-details: always  # Show health check details for all endpoints
+  health:
+    circuitbreakers:
+      enabled: true         # Enable circuit breaker health status
+  endpoints:
+    web:
+      exposure:
+        include: health, circuitbreakers, circuitbreakerevents  # Expose relevant actuator endpoints
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      serviceA:
+        registerHealthIndicator: true  # Enable health indicator for circuit breaker
+        eventConsumerBufferSize: 10    # Buffer size for emitted events
+        failureRateThreshold: 50       # % of failures to open circuit
+        minimumNumberOfCalls: 5        # Minimum number of calls to evaluate failure rate
+        automaticTransitionFromOpenToHalfOpenEnabled: true  # Auto transition after wait duration
+        waitDurationInOpenState: 5s    # Time circuit stays OPEN before testing recovery
+        permittedNumberOfCallsInHalfOpenState: 3  # Test calls allowed in HALF_OPEN
+        slidingWindowSize: 10          # Window size to count calls
+        slidingWindowType: COUNT_BASED # COUNT_BASED | TIME_BASED (can change to TIME_BASED if needed)
+
+  retry:
+    instances:
+      serviceA:
+        registerHealthIndicator: true  # Enable retry health indicator
+        maxRetryAttempts: 5            # Max retry attempts before failure
+        waitDuration: 10s              # Wait between retry attempts
+
+  ratelimiter:
+    instances:
+      serviceA:
+        registerHealthIndicator: false  # Disable health indicator for rate limiter
+        limitForPeriod: 10              # Allow 10 requests per period
+        limitRefreshPeriod: 10s         # Refresh rate limit every 10 seconds
+        timeoutDuration: 3s             # Max wait time to acquire permission
+
+logging:
+  level:
+    root: INFO
